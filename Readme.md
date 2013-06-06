@@ -50,7 +50,8 @@ The latest version of CCCVTK is available on GitHub at the following URL:
 
 https://github.com/sylvainhalle/CCCVTK
 
-To install CCCVTK, unzip the contents of the archive on GitHub into some
+To install CCCVTK, unzip the contents of the [archive on
+GitHub](https://github.com/sylvainhalle/CCCVTK/archive/master.zip) into some
 folder. Alternatively, you can clone the Git repository using the
 instructions that appear at the top of the GitHub page.
 
