@@ -28,7 +28,16 @@
 require_once("common-cv.lib.php");
 
 // Include the Bibtex class
-require_once("bibtex-bib.lib.php");
+if (file_exists("bibtex-bib.lib.php"))
+{
+  require_once("bibtex-bib.lib.php");
+  define("BIBTEX_PRESENT", true);
+}
+else
+{
+  define("BIBTEX_PRESENT", false);
+  $bib = null;
+}
 
 /* Basic configuration. Fill in the blanks. */
 
@@ -58,7 +67,10 @@ $ccv = new CommonCV($cv_filename);
 $stats = array();
 
 // Instantiate a BibTeX object
-$bib = new Bibliography($bibtex_filename);
+if (BIBTEX_PRESENT)
+{
+  $bib = new Bibliography($bibtex_filename);
+}
 
 // Gather data from all sections
 $s_date = date("Y-m-d");
@@ -266,13 +278,16 @@ function section_publications($ccv, $pub_first_year = -1) // {{{
           break;
     }
     // Complement with BibTeX data if any
-    $bib_entry = $bib->getEntryByTitle($pub['title']);
-    if ($bib_entry != null)
+    if (BIBTEX_PRESENT)
     {
-      if (isset($bib_entry["impactfactor"]))
+      $bib_entry = $bib->getEntryByTitle($pub['title']);
+      if ($bib_entry != null)
       {
-      	list($year, $ifactor) = explode(":", $bib_entry["impactfactor"]);
-      	$tmp_out .= " \\textsl{Impact factor: $ifactor in $year.} ";
+	if (isset($bib_entry["impactfactor"]))
+	{
+	  list($year, $ifactor) = explode(":", $bib_entry["impactfactor"]);
+	  $tmp_out .= " \\textsl{Impact factor: $ifactor in $year.} ";
+	}
       }
     }
     if (!empty($pub['url']))
@@ -335,17 +350,20 @@ function section_publications($ccv, $pub_first_year = -1) // {{{
           break;
     }
     // Complement with BibTeX data if any
-    $bib_entry = $bib->getEntryByTitle($pub['title']);
-    if ($bib_entry != null)
+    if (BIBTEX_PRESENT)
     {
-      if (isset($bib_entry["rate"]))
+      $bib_entry = $bib->getEntryByTitle($pub['title']);
+      if ($bib_entry != null)
       {
-      	$t_out .= " \\textsl{Acceptance rate: ".$bib_entry["rate"]."\\%} ";
+	if (isset($bib_entry["rate"]))
+	{
+	  $t_out .= " \\textsl{Acceptance rate: ".$bib_entry["rate"]."\\%} ";
+	}
       }
     }
     if (!empty($pub['url']))
       $t_out .= " \\url{".$pub['url']."}";
-    if (isset($bib_entry["note"]) && strpos($bib_entry["note"], "award") !== false)
+    if (BIBTEX_PRESENT && isset($bib_entry["note"]) && strpos($bib_entry["note"], "award") !== false)
     {
       $t_out .= " \\\\ \\textbf{Best paper award} ";
     }
