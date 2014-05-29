@@ -1,7 +1,7 @@
 <?php
 /*
     CCCVTK, the Canadian Common CV Toolkit
-    Copyright (C) 2013 Sylvain Hallé
+    Copyright (C) 2013-2014 Sylvain Hallé
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,10 +27,16 @@
 // Include the CommonCV class
 require_once("common-cv.lib.php");
 
+// Include the Bibtex class
+require_once("bibtex-bib.lib.php");
+
 /* Basic configuration. Fill in the blanks. */
 
 // Location of the CV data
 $cv_filename = "cv.xml";
+
+// Location of the complementary BibTeX data
+$bibtex_filename = "publications.bib";
 
 // Your name; will be put in bold in the list of authors
 $my_name = "S. Hallé";
@@ -51,6 +57,9 @@ $committee_first_year = -1;  // Committee memberships
 $ccv = new CommonCV($cv_filename);
 $stats = array();
 
+// Instantiate a BibTeX object
+$bib = new Bibliography($bibtex_filename);
+
 // Gather data from all sections
 $s_date = date("Y-m-d");
 $s_personal = section_personal_info($ccv);
@@ -70,6 +79,7 @@ echo <<<EOD
 \\usepackage[english]{babel}
 \\usepackage{enumerate}
 \\usepackage{mathptmx}
+\\usepackage{microtype}
 \\usepackage[margin=1in]{geometry}
 \\usepackage[bookmarks=true]{hyperref}
 \\hypersetup{%
@@ -134,7 +144,7 @@ function section_personal_info($ccv) // {{{
  * ------------------ */
 function section_publications($ccv, $pub_first_year = -1) // {{{
 {
-  global $and_word, $my_name, $stats;
+  global $and_word, $my_name, $stats, $bib;
   $t_out = "";
   $tmp_out = "";
   if ($pub_first_year < 0)
@@ -155,12 +165,13 @@ function section_publications($ccv, $pub_first_year = -1) // {{{
     {
       $first = false;
       $tmp_out .= "\n\\subsection*{Book Chapters}\n\n";
-      $tmp_out .= "\\begin{enumerate}\n\n";
-      $tmp_out .= "\\setcounter{enumi}{".$stats['pub_count']."}\n";
+      $tmp_out .= "\\begingroup\n\\renewcommand{\\section}[2]{}%\n";
+      $tmp_out .= "\\begin{thebibliography}{99}\n\n";
+      //$tmp_out .= "\\setcounter{enumi}{".$stats['pub_count']."}\n";
     }
     $stats['pub_count']++;
     $stats['pub_count_chapters']++;
-    $tmp_out .= "\\item ";
+    $tmp_out .= "\\bibitem[".$stats['pub_count']."]{".$id."} ";
     $auth = $ccv->reverseAuthors($pub['authors']);
     $editors = $ccv->reverseAuthors($pub['editors']);
     $tmp_out .= and_on_last(latex_periods(to_boldface($my_name, p($auth))), $and_word).p(". ({$pub['date_year']}). {$pub['title']}. In ");
@@ -200,7 +211,7 @@ function section_publications($ccv, $pub_first_year = -1) // {{{
     $tmp_out .= "\n\n";
   }
   if (!$first)
-    $tmp_out .= "\\end{enumerate}\n";
+    $tmp_out .= "\\end{thebibliography}\n\\endgroup\n";
   
   // Journals
   $publis = $ccv->getJournalPapers();
@@ -213,12 +224,13 @@ function section_publications($ccv, $pub_first_year = -1) // {{{
     {
       $first = false;
       $tmp_out .= "\n\\subsection*{Journal papers}\n\n";
-      $tmp_out .= "\\begin{enumerate}\n\n";
+      $tmp_out .= "\\begingroup\n\\renewcommand{\\section}[2]{}%\n";
+      $tmp_out .= "\\begin{thebibliography}{99}\n\n";
       $tmp_out .= "\\setcounter{enumi}{".$stats['pub_count']."}\n";
     }
     $stats['pub_count']++;
     $stats['pub_count_journals']++;
-    $tmp_out .= "\\item ";
+    $tmp_out .= "\\bibitem[".$stats['pub_count']."]{".$id."} ";
     $auth = $ccv->reverseAuthors($pub['authors']);
     $editors = $ccv->reverseAuthors($pub['editors']);
     $tmp_out .= and_on_last(latex_periods(to_boldface($my_name, p($auth))), $and_word).p(". ({$pub['date_year']}). {$pub['title']}. In ");
@@ -253,12 +265,22 @@ function section_publications($ccv, $pub_first_year = -1) // {{{
         default:
           break;
     }
+    // Complement with BibTeX data if any
+    $bib_entry = $bib->getEntryByTitle($pub['title']);
+    if ($bib_entry != null)
+    {
+      if (isset($bib_entry["impactfactor"]))
+      {
+      	list($year, $ifactor) = explode(":", $bib_entry["impactfactor"]);
+      	$tmp_out .= " \\textsl{Impact factor: $ifactor in $year.} ";
+      }
+    }
     if (!empty($pub['url']))
       $tmp_out .= " \\url{".$pub['url']."}";
     $tmp_out .= "\n\n";
   }
   if (!$first)
-    $tmp_out .= "\\end{enumerate}\n";
+    $tmp_out .= "\\end{thebibliography}\n\\endgroup\n";
   $t_out .= $tmp_out;
 
   // Conferences/workshops
@@ -273,12 +295,13 @@ function section_publications($ccv, $pub_first_year = -1) // {{{
     {
       $first = false;
       $t_out .= "\n\\subsection*{Peer-reviewed conference papers}\n\n";
-      $t_out .= "\\begin{enumerate}\n\n";
+      $t_out .= "\\begingroup\n\\renewcommand{\\section}[2]{}%\n";
+      $t_out .= "\\begin{thebibliography}{99}\n\n";
       $t_out .= "\\setcounter{enumi}{".$stats['pub_count']."}\n";
     }
     $stats['pub_count']++;
     $stats['pub_count_confs']++;
-    $t_out .= "\\item ";
+    $t_out .= "\\bibitem[".$stats['pub_count']."]{".$id."} ";
     $auth = $ccv->reverseAuthors($pub['authors']);
     $editors = $ccv->reverseAuthors($pub['editors']);
     $t_out .= and_on_last(latex_periods(to_boldface($my_name, p($auth))), $and_word).p(". ({$pub['date_year']}). {$pub['title']}. In ");
@@ -311,12 +334,25 @@ function section_publications($ccv, $pub_first_year = -1) // {{{
         default:
           break;
     }
+    // Complement with BibTeX data if any
+    $bib_entry = $bib->getEntryByTitle($pub['title']);
+    if ($bib_entry != null)
+    {
+      if (isset($bib_entry["rate"]))
+      {
+      	$t_out .= " \\textsl{Acceptance rate: ".$bib_entry["rate"]."\\%} ";
+      }
+    }
     if (!empty($pub['url']))
       $t_out .= " \\url{".$pub['url']."}";
+    if (isset($bib_entry["note"]) && strpos($bib_entry["note"], "award") !== false)
+    {
+      $t_out .= " \\\\ \\textbf{Best paper award} ";
+    }
     $t_out .= "\n\n";
   }
   if (!$first)
-    $t_out .= "\\end{enumerate}\n";
+    $t_out .= "\\end{thebibliography}\n\\endgroup\n";
   return $t_out;
 } // }}}
 
@@ -408,8 +444,18 @@ function section_funding($ccv, $funds_first_year) // {{{
       else
         $tmp_out .= p("--{$fund['end_year']} ");
     else
+    {
       $tmp_out .= "-in progress. ";
-    $tmp_out .= "$\\cdot$ ".p($ccv->getCaptionFromValue($fund['funder'], "Funding Organization"));
+    }
+    if ($fund['funder'] != "")
+    {
+      $fundername = p($ccv->getCaptionFromValue($fund['funder'], "Funding Organization"));
+    }
+    else
+    {
+      $fundername = $fund['otherfunder'];
+    }
+    $tmp_out .= "$\\cdot$ $fundername";
     if (!empty($fund['funding_program']))
       $tmp_out .= ", ".p($fund['funding_program']);
     $tmp_out .= " $\\cdot$ ".p($fund['funding_title']).". ";
