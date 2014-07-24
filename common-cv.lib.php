@@ -95,6 +95,7 @@ class CommonCV // {{{
         $record["peer_reviewed"] = false;
       $record["conf_name"] = $this->get_xpath("field[@id='b3c8a60c053a405597b92899d95765a3']/value", $elements->item($i));
       $record["published_in"] = $this->get_xpath("field[@id='1a1b39e861054ee59d270e66271a4ead']/value", $elements->item($i));
+      $record["city"] = $this->get_xpath("field[@id='c2efd9725588489b8df73467c5597c32']/value", $elements->item($i));
       $date = $this->get_xpath("field[@id='0318d139f3e0479083188ff8319a97b2']/value", $elements->item($i));
       list($date_year, $date_month) = explode("/", $date);
       $record["date_year"] = $date_year;
