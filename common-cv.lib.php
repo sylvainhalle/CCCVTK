@@ -198,7 +198,7 @@ class CommonCV // {{{
       $record["name"] = $this->get_xpath("field[@id='3c504aafda28418ea439d8f92c28aef0']/value", $elements->item($i));
       $record["institution"] = $this->get_xpath("field[@id='e36ccf9a00a241dc942e608df32c8c84']/value", $elements->item($i));
       $record["diploma"] = $this->get_xpath("field[@id='5b8638e8646448dcb8edef2c21e01c87']/lov/@id", $elements->item($i));
-      $record["status"] = $this->get_xpath("field[@id='e5d331dca0fc4000992e43b695b2db21']/value", $elements->item($i));
+      $record["status"] = $this->get_xpath("field[@id='e5d331dca0fc4000992e43b695b2db21']/lov/@id", $elements->item($i));
       $record["title"] = $this->get_xpath("field[@id='420e5bbd57104c3c9823b5e6850ee6f8']/value", $elements->item($i));
       $records[$id] = $record;
     }
