@@ -257,6 +257,7 @@ class CommonCV // {{{
       $records["greeting"] = $this->get_xpath("field[@id='ee8beaea41f049d8bcfadfbfa89ac09e']/lov/@id", $elements->item($i));
       $records["last_name"] = $this->get_xpath("field[@id='5c6f17e8a67241e19667815a9e95d9d0']/value", $elements->item($i));
       $records["first_name"] = $this->get_xpath("field[@id='98ad36fee26a4d6b8953ea764f4fed04']/value", $elements->item($i));
+      $records["sex"] = $this->get_xpath("field[@id='3d258d8ceb174d3eb2ae1258a780d91b']/lov/@id", $elements->item($i));
       $co_holders = array();
       $co_els = $this->m_xpath->query("//section[@id='b92721f0510a4ef4b0d1cf7f5ea3f01e']");
       for ($j = 0; !is_null($co_els) && $j < $co_els->length; $j++)
