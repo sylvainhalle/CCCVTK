@@ -302,6 +302,9 @@ class CommonCV // {{{
       @list($record["start_year"], $record["start_month"]) = explode("/", $date);
       $date = $this->get_xpath("field[@id='b4681f52d85440829faa3160ba3bb31f']/value", $elements->item($i));
       @list($record["end_year"], $record["end_month"]) = explode("/", $date);
+      $record["end_year"] = ($record["end_year"] == null) ? "" : $record["end_year"];
+      $record["end_month"] = ($record["end_month"] == null) ? "" : $record["end_month"];
+      
       $record['organization_country'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Country']/@value", $elements->item($i));
       $record['organization_subdivision'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Subdivision']/@value", $elements->item($i));
       $record['organization_type'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Organization Type']/@value", $elements->item($i));
