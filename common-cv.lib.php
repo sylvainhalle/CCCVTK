@@ -282,6 +282,39 @@ class CommonCV // {{{
   } // }}}
   
   /**
+   * Parses the list of employment and returns (some of its) data
+   * as an associative array for convenience
+   */
+  public function getEmployment() // {{{
+   {
+    global $CCV_CONST;
+    $records = array();
+    $elements = $this->m_xpath->query("//section[@id='b857f61b33484cb093068bd2da764f99']");
+    for ($i = 0; !is_null($elements) && $i < $elements->length; $i++)
+    {
+      $record = array();
+      $id = $this->get_xpath("@recordId", $elements->item($i));
+      $record['type'] = $this->get_xpath("field[@id='9510a03a308f43ceb8cd046aeffa9499']/lov/@id", $elements->item($i));
+      $record['title'] = $this->get_xpath("field[@id='886807b87b624978bc8ca9045ff56e47']/value", $elements->item($i));
+      $record['status'] = $this->get_xpath("field[@id='ef7bd6fa8dd040449fa181f0ca4530e4']/lov/@id", $elements->item($i));
+      $record['rank'] = $this->get_xpath("field[@id='500e1360abd14972bc1ef844a8b98087']/lov/@id", $elements->item($i));
+      $date = $this->get_xpath("field[@id='c7e85d10d10249c68b28c71fc80ec570']/value", $elements->item($i));
+      @list($record["start_year"], $record["start_month"]) = explode("/", $date);
+      $date = $this->get_xpath("field[@id='b4681f52d85440829faa3160ba3bb31f']/value", $elements->item($i));
+      @list($record["end_year"], $record["end_month"]) = explode("/", $date);
+      $record['organization_country'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Country']/@value", $elements->item($i));
+      $record['organization_subdivision'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Subdivision']/@value", $elements->item($i));
+      $record['organization_type'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Organization Type']/@value", $elements->item($i));
+      $record['organization_name'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Organization']/@value", $elements->item($i));
+      $record['department'] = $this->get_xpath("field[@id='cd6e5e97994e42f893bd5c9e7212c94b']/value", $elements->item($i));
+      $record['faculty'] = $this->get_xpath("field[@id='58cf7001d283421b91f5da21f0ef2188']/value", $elements->item($i));
+      $record['tenure'] = $this->get_xpath("field[@id='b0eca39ad77346648180dec948d13432']/lov/@id", $elements->item($i));
+      $records[$id] = $record;
+    }
+    return $records;
+   } // }}}
+  
+  /**
    * Parses the list of courses taught info and returns (some of its) data
    * as an associative array for convenience
    */
