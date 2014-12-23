@@ -227,6 +227,7 @@ class CommonCV // {{{
       $record["funder"] = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='67e083b070954e91bcbb1cc70131145a']/lov/@id", $elements->item($i));
       $record["otherfunder"] = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='1bdead14642545f3971a59997d82da67']/value", $elements->item($i));
       $record["total_amount"] = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='dfe6a0b34347486aaa677f07306a141e']/value", $elements->item($i));
+      $record["received_amount"] = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='882a94c7548744ca992e2647346d2e14']/value", $elements->item($i));
       $record["role"] = $this->get_xpath("field[@id='13806a6772d248158619261afaab2fe0']/lov/@id", $elements->item($i));
       $co_holders = array();
       $co_els = $this->m_xpath->query("section[@id='c7c473d1237b432fb7f2abd831130fb7']", $elements->item($i));
@@ -238,6 +239,11 @@ class CommonCV // {{{
         $co_holders[$ch_id] = $co_holder;
       }
       $record["co_holders"] = $co_holders;
+      $comp = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='00efdc7e790a48ac8675696c66afc3ad']/lov/@id", $elements->item($i));
+      if ($comp === $CCV_CONST["Yes-No"]["Yes"])
+        $record["competitive"] = true;
+      elseif ($comp === $CCV_CONST["Yes-No"]["No"])
+        $record["competitive"] = false;
       $records[$id] = $record;
     }
     return $records;
