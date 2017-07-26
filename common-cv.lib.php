@@ -223,10 +223,12 @@ class CommonCV // {{{
       $date = $this->get_xpath("field[@id='b63179ab0f0e4c9eaa7e9a8130d60ee3']/value", $elements->item($i));
       @list($record["end_year"], $record["end_month"]) = explode("/", $date);
       $record["funding_title"] = $this->get_xpath("field[@id='735545eb499e4cc6a949b4b375a804e8']/value", $elements->item($i));
+      $record["funding_type"] = $this->get_xpath("field[@id='931b92a5ffed4e5aa9c7b3a0afd5f8ba']/lov/@id", $elements->item($i));
       $record["funding_program"] = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='97231512141a452a82151cc162e9a59c']/value", $elements->item($i));
       $record["funder"] = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='67e083b070954e91bcbb1cc70131145a']/lov/@id", $elements->item($i));
       $record["otherfunder"] = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='1bdead14642545f3971a59997d82da67']/value", $elements->item($i));
       $record["total_amount"] = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='dfe6a0b34347486aaa677f07306a141e']/value", $elements->item($i));
+      $record["received_amount"] = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='882a94c7548744ca992e2647346d2e14']/value", $elements->item($i));
       $record["role"] = $this->get_xpath("field[@id='13806a6772d248158619261afaab2fe0']/lov/@id", $elements->item($i));
       $co_holders = array();
       $co_els = $this->m_xpath->query("section[@id='c7c473d1237b432fb7f2abd831130fb7']", $elements->item($i));
@@ -238,6 +240,11 @@ class CommonCV // {{{
         $co_holders[$ch_id] = $co_holder;
       }
       $record["co_holders"] = $co_holders;
+      $comp = $this->get_xpath("section[@id='376b8991609f46059a3d66028f005360']/field[@id='00efdc7e790a48ac8675696c66afc3ad']/lov/@id", $elements->item($i));
+      if ($comp === $CCV_CONST["Yes-No"]["Yes"])
+        $record["competitive"] = true;
+      elseif ($comp === $CCV_CONST["Yes-No"]["No"])
+        $record["competitive"] = false;
       $records[$id] = $record;
     }
     return $records;
@@ -257,6 +264,7 @@ class CommonCV // {{{
       $records["greeting"] = $this->get_xpath("field[@id='ee8beaea41f049d8bcfadfbfa89ac09e']/lov/@id", $elements->item($i));
       $records["last_name"] = $this->get_xpath("field[@id='5c6f17e8a67241e19667815a9e95d9d0']/value", $elements->item($i));
       $records["first_name"] = $this->get_xpath("field[@id='98ad36fee26a4d6b8953ea764f4fed04']/value", $elements->item($i));
+      $records["sex"] = $this->get_xpath("field[@id='3d258d8ceb174d3eb2ae1258a780d91b']/lov/@id", $elements->item($i));
       $co_holders = array();
       $co_els = $this->m_xpath->query("//section[@id='b92721f0510a4ef4b0d1cf7f5ea3f01e']");
       for ($j = 0; !is_null($co_els) && $j < $co_els->length; $j++)
@@ -279,6 +287,42 @@ class CommonCV // {{{
     
     return $records;
   } // }}}
+  
+  /**
+   * Parses the list of employment and returns (some of its) data
+   * as an associative array for convenience
+   */
+  public function getEmployment() // {{{
+   {
+    global $CCV_CONST;
+    $records = array();
+    $elements = $this->m_xpath->query("//section[@id='b857f61b33484cb093068bd2da764f99']");
+    for ($i = 0; !is_null($elements) && $i < $elements->length; $i++)
+    {
+      $record = array();
+      $id = $this->get_xpath("@recordId", $elements->item($i));
+      $record['type'] = $this->get_xpath("field[@id='9510a03a308f43ceb8cd046aeffa9499']/lov/@id", $elements->item($i));
+      $record['title'] = $this->get_xpath("field[@id='886807b87b624978bc8ca9045ff56e47']/value", $elements->item($i));
+      $record['status'] = $this->get_xpath("field[@id='ef7bd6fa8dd040449fa181f0ca4530e4']/lov/@id", $elements->item($i));
+      $record['rank'] = $this->get_xpath("field[@id='500e1360abd14972bc1ef844a8b98087']/lov/@id", $elements->item($i));
+      $date = $this->get_xpath("field[@id='c7e85d10d10249c68b28c71fc80ec570']/value", $elements->item($i));
+      @list($record["start_year"], $record["start_month"]) = explode("/", $date);
+      $date = $this->get_xpath("field[@id='b4681f52d85440829faa3160ba3bb31f']/value", $elements->item($i));
+      @list($record["end_year"], $record["end_month"]) = explode("/", $date);
+      $record["end_year"] = ($record["end_year"] == null) ? "" : $record["end_year"];
+      $record["end_month"] = ($record["end_month"] == null) ? "" : $record["end_month"];
+      
+      $record['organization_country'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Country']/@value", $elements->item($i));
+      $record['organization_subdivision'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Subdivision']/@value", $elements->item($i));
+      $record['organization_type'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Organization Type']/@value", $elements->item($i));
+      $record['organization_name'] = $this->get_xpath("field[@id='5dd34f14c1ea47c09e8ddcd202653814']/refTable/linkedWith[@label='Organization']/@value", $elements->item($i));
+      $record['department'] = $this->get_xpath("field[@id='cd6e5e97994e42f893bd5c9e7212c94b']/value", $elements->item($i));
+      $record['faculty'] = $this->get_xpath("field[@id='58cf7001d283421b91f5da21f0ef2188']/value", $elements->item($i));
+      $record['tenure'] = $this->get_xpath("field[@id='b0eca39ad77346648180dec948d13432']/lov/@id", $elements->item($i));
+      $records[$id] = $record;
+    }
+    return $records;
+   } // }}}
   
   /**
    * Parses the list of courses taught info and returns (some of its) data
